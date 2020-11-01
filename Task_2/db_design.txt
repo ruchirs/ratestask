@@ -1,0 +1,17 @@
+Q: Imagine you need to receive and update batches of tens of thousands of new prices, conforming to a similar format. Describe, using a couple of paragraphs, how you would design the system to be able to handle those requirements. Which factors do you need to take into consideration?
+
+A: If we create update request in tens of thousands that means the table is big, assuming the ID's of records are sequential.
+
+1. we need to avoid processing the complete table instead we can divine the table into small parts.
+
+2. We can use the concept of sharing and make horizontal partitions of the table.
+
+3. We can then use horizontal partitioning in shards to reduce the record set, to know which partition to hit, we can implement a partition key.
+
+4. then, we can index the partitions and make a small set of records to search and update.
+
+5. As we are using shards, there might be instances where the node instance holding the requested shard might be down, this would fail the update operation.
+
+6. To make the update operation reliable, we can store the failed update records data into another table with record's expected shard ID and once all the given records are updated we can update the this table again after confirming all the Node instances are up and running.
+
+7. This method/ failed table records will also sketch a real-time picture of which node's were down and the frequency of records failed, which would give up more data to debug and improve.
